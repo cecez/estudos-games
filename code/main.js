@@ -5,6 +5,7 @@ kaboom()
 
 // load assets
 loadSprite("bean", "sprites/bean.png")
+loadSprite("jogador", "sprites/jogador.png")
 
 // add a character to screen
 add([
@@ -12,6 +13,10 @@ add([
 	sprite("bean"),
 	pos(80, 40),
 	area(),
+])
+
+add([
+  sprite("jogador")
 ])
 
 // add a kaboom on mouse click

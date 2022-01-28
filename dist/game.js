@@ -2908,10 +2908,14 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   // code/main.js
   to();
   loadSprite("bean", "sprites/bean.png");
+  loadSprite("jogador", "sprites/jogador.png");
   add([
     sprite("bean"),
     pos(80, 40),
     area()
+  ]);
+  add([
+    sprite("jogador")
   ]);
   onClick(() => {
     addKaboom(mousePos());
