@@ -2910,41 +2910,45 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSprite("jp", "sprites/jp.png");
   loadSprite("miguel", "sprites/miguel.png");
   loadSprite("chao", "sprites/chao.png");
-  var jp = add([
-    sprite("jp"),
-    scale(0.2),
-    pos(280, 40),
-    area(),
-    body()
-  ]);
-  var MOVIMENTO_X = 200;
-  keyDown("right", () => {
-    jp.move(MOVIMENTO_X, 0);
-  });
-  keyDown("left", () => {
-    jp.move(-MOVIMENTO_X, 0);
-  });
-  add([
+  var miguel = add([
     sprite("miguel"),
     pos(100, 40),
     scale(0.2),
     area(),
     body()
   ]);
+  var MOVIMENTO_X = 200;
+  keyDown("right", () => {
+    miguel.move(MOVIMENTO_X, 0);
+  });
+  keyDown("left", () => {
+    miguel.move(-MOVIMENTO_X, 0);
+  });
+  onKeyPress("space", () => {
+    if (miguel.grounded()) {
+      miguel.jump();
+    }
+  });
   addLevel([
     "         ",
     "         ",
-    "         ",
+    "       C ",
     "         ",
     "xxxxxxxxx"
   ], {
     width: 40,
     height: 40,
-    "x": () => [sprite("chao"), solid(), area()]
+    "x": () => [sprite("chao"), solid(), area()],
+    "C": () => [sprite("jp"), scale(0.2), solid(), area(), body(), "chefao"]
   });
   onClick(() => {
     addKaboom(mousePos());
   });
   onKeyPress("b", burp);
+  miguel.collides("chefao", () => {
+    addKaboom(miguel.pos);
+    shake();
+    destroy(miguel);
+  });
 })();
 //# sourceMappingURL=game.js.map
