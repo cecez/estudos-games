@@ -2681,8 +2681,24 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
 
   // game.js
   no();
-  add([
-    text("hello"),
-    pos(120, 80)
-  ]);
+  loadSprite("parede", "sprites/parede.png");
+  loadSprite("bean", "sprites/bean.png");
+  addLevel([
+    "E*****   D",
+    "E*****   D",
+    "E*****   D",
+    "E*****   D",
+    "E*****   D",
+    "E        D",
+    "E        D",
+    "E        D",
+    "E        D",
+    "E   ^    D"
+  ], {
+    width: 30,
+    height: 22,
+    "E": () => [sprite("parede"), "parede-esquerda"],
+    "D": () => [sprite("parede"), "parede-direita"],
+    "*": () => [sprite("bean")]
+  });
 })();

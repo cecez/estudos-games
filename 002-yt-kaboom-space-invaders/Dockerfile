@@ -1,4 +1,6 @@
-FROM node:14
+FROM node:17
+
+RUN npm install -g npm@8.4.1
 
 WORKDIR /home/app
 USER node
