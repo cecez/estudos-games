@@ -10,7 +10,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild game.js --bundle --outfile=build.js"
+    "build": "esbuild game.js --bundle --outfile=build.js",
+    "build:watch": "esbuild game.js --bundle --outfile=build.js --watch"
   },
   "author": "",
   "license": "ISC"
