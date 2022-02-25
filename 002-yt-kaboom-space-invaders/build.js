@@ -2682,9 +2682,12 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   // game.js
   var VELOCIDADE_DE_MOVIMENTO = 400;
   var VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER = 400;
+  var VELOCIDADE_DO_TIRO = 300;
   var ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER = 450;
   var TEMPO_RESTANTE = 15;
-  no();
+  no({
+    background: [0, 0, 255]
+  });
   loadSprite("parede", "sprites/parede.png");
   loadSprite("bean", "sprites/bean.png");
   loadSprite("jp", "sprites/jp.png");
@@ -2738,6 +2741,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         tempo: TEMPO_RESTANTE
       }
     ]);
+    placar.onUpdate(() => {
+      placar.text = placar.valor;
+    });
     temporizador.onUpdate(() => {
       temporizador.tempo -= dt();
       temporizador.text = temporizador.tempo.toFixed(2);
@@ -2763,6 +2769,32 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     });
     jogador.onCollide("space-invader", () => {
       go("perdeu", { placar: placar.valor });
+    });
+    function disparaTiro(posicao) {
+      add([
+        rect(6, 18),
+        area(),
+        pos(posicao),
+        origin("center"),
+        color(RED),
+        "tiro"
+      ]);
+    }
+    keyPress("space", () => {
+      disparaTiro(jogador.pos.add(0, -10));
+    });
+    action("tiro", (tiro) => {
+      tiro.move(0, -VELOCIDADE_DO_TIRO);
+      burp();
+      if (tiro.pos.y < 0) {
+        tiro.destroy();
+      }
+    });
+    collides("tiro", "space-invader", (tiro, inimigo) => {
+      shake(120);
+      inimigo.destroy();
+      tiro.destroy();
+      placar.valor++;
     });
   });
   scene("perdeu", (dados) => {

@@ -3,14 +3,18 @@ import kaboom from "kaboom";
 
 const VELOCIDADE_DE_MOVIMENTO = 400
 const VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER = 400
+const VELOCIDADE_DO_TIRO = 300
 const ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER = 450
 const TEMPO_RESTANTE = 15
 
-kaboom()
+kaboom({
+    background: [ 0, 0, 255, ]
+})
 
 loadSprite("parede", "sprites/parede.png")
 loadSprite("bean", "sprites/bean.png")
 loadSprite("jp", "sprites/jp.png")
+
 
 scene("jogo", () => {
 
@@ -73,6 +77,10 @@ scene("jogo", () => {
             tempo: TEMPO_RESTANTE
         }
     ])
+
+    placar.onUpdate(() => {
+        placar.text = placar.valor
+    })
     
     temporizador.onUpdate(() => {
         temporizador.tempo -= dt()
@@ -106,6 +114,36 @@ scene("jogo", () => {
         go("perdeu", { placar: placar.valor })
     })
 
+    function disparaTiro(posicao) {
+        add([
+            rect(6, 18),
+            area(),
+            pos(posicao),
+            origin("center"),
+            color(RED),
+            "tiro"
+        ])
+    }
+
+    keyPress("space", () => {
+        disparaTiro(jogador.pos.add(0, -10))
+    })
+
+    action("tiro", (tiro) => {
+        tiro.move(0, -VELOCIDADE_DO_TIRO)
+        burp()
+        if (tiro.pos.y < 0) {
+            tiro.destroy()
+        }
+    })
+
+    collides("tiro", "space-invader", (tiro, inimigo) => {
+        shake(120)
+        inimigo.destroy()
+        tiro.destroy()
+        placar.valor++
+    })
+
 });
 
 
@@ -121,6 +159,8 @@ scene("perdeu", (dados) => {
         pos(width() / 2, (height() / 2) + 100),
         origin("center")
     ])
+
+    
 })
 
 go("jogo")
