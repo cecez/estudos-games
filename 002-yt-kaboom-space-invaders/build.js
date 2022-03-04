@@ -2691,7 +2691,29 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSprite("parede", "sprites/parede.png");
   loadSprite("bean", "sprites/bean.png");
   loadSprite("jp", "sprites/jp.png");
+  loadSound("somDaDerrota", "sounds/derrota.mp3");
+  loadSound("somDaFase1", "sounds/fundo_fase_1.m4a");
+  loadSound("inimigoMorre", "sounds/inimigo_morre.m4a");
+  var somDaDerrota = play("somDaDerrota", {
+    volume: 0.8,
+    loop: true
+  });
+  var somDaFase1 = play("somDaFase1", {
+    volume: 0.5,
+    loop: true
+  });
+  scene("come\xE7o", () => {
+    add([
+      text("Clique para iniciar o jogo"),
+      pos(center()),
+      origin("center")
+    ]);
+    somDaDerrota.pause();
+    somDaFase1.pause();
+    onClick(() => go("jogo"));
+  });
   scene("jogo", () => {
+    somDaFase1.play();
     layer(["obj", "ui"], "obj");
     addLevel([
       "E*****   D",
@@ -2718,11 +2740,17 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       origin("center"),
       area()
     ]);
-    keyDown("left", () => {
+    onKeyDown("left", () => {
       jogador.move(-VELOCIDADE_DE_MOVIMENTO, 0);
     });
-    keyDown("right", () => {
+    onKeyDown("right", () => {
       jogador.move(VELOCIDADE_DE_MOVIMENTO, 0);
+    });
+    onKeyDown("up", () => {
+      jogador.move(0, -VELOCIDADE_DE_MOVIMENTO);
+    });
+    onKeyDown("down", () => {
+      jogador.move(0, VELOCIDADE_DE_MOVIMENTO);
     });
     const placar = add([
       text("0"),
@@ -2752,16 +2780,16 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       }
     });
     let velocidadeAtualDoSpaceInvader = VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER;
-    action("space-invader", (s) => {
+    onUpdate("space-invader", (s) => {
       s.move(velocidadeAtualDoSpaceInvader, 0);
     });
-    collides("space-invader", "parede-direita", () => {
+    onCollide("space-invader", "parede-direita", () => {
       velocidadeAtualDoSpaceInvader = -VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER;
       every("space-invader", (s) => {
         s.move(0, ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER);
       });
     });
-    collides("space-invader", "parede-esquerda", () => {
+    onCollide("space-invader", "parede-esquerda", () => {
       velocidadeAtualDoSpaceInvader = VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER;
       every("space-invader", (s) => {
         s.move(0, ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER);
@@ -2780,24 +2808,26 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         "tiro"
       ]);
     }
-    keyPress("space", () => {
+    onKeyPress("space", () => {
       disparaTiro(jogador.pos.add(0, -10));
     });
-    action("tiro", (tiro) => {
+    onUpdate("tiro", (tiro) => {
       tiro.move(0, -VELOCIDADE_DO_TIRO);
-      burp();
       if (tiro.pos.y < 0) {
         tiro.destroy();
       }
     });
-    collides("tiro", "space-invader", (tiro, inimigo) => {
-      shake(120);
+    onCollide("tiro", "space-invader", (tiro, inimigo) => {
+      shake(80);
+      play("inimigoMorre");
       inimigo.destroy();
       tiro.destroy();
       placar.valor++;
     });
   });
   scene("perdeu", (dados) => {
+    somDaFase1.pause();
+    somDaDerrota.play();
     add([
       text("Game Over"),
       pos(center()),
@@ -2808,6 +2838,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       pos(width() / 2, height() / 2 + 100),
       origin("center")
     ]);
+    onClick(() => go("come\xE7o"));
   });
-  go("jogo");
+  go("come\xE7o");
 })();

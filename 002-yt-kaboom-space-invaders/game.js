@@ -14,9 +14,41 @@ kaboom({
 loadSprite("parede", "sprites/parede.png")
 loadSprite("bean", "sprites/bean.png")
 loadSprite("jp", "sprites/jp.png")
+loadSound("somDaDerrota", "sounds/derrota.mp3")
+loadSound("somDaFase1", "sounds/fundo_fase_1.m4a")
+loadSound("inimigoMorre", "sounds/inimigo_morre.m4a")
+
+
+const somDaDerrota = play("somDaDerrota", {
+    volume: 0.8,
+    loop: true
+})
+
+const somDaFase1 = play("somDaFase1", {
+    volume: 0.5,
+    loop: true
+})
+
+scene("começo", () => {
+
+    add([
+        text("Clique para iniciar o jogo"),
+        pos(center()),
+        origin("center")
+    ])
+
+    somDaDerrota.pause()
+    somDaFase1.pause()
+
+    onClick(() => go("jogo"))
+
+})
 
 
 scene("jogo", () => {
+
+    somDaFase1.play()
+
 
     layer(['obj', 'ui'], 'obj')
 
@@ -51,12 +83,20 @@ scene("jogo", () => {
         area()
     ])
     
-    keyDown('left', () => {
+    onKeyDown('left', () => {
         jogador.move(-VELOCIDADE_DE_MOVIMENTO, 0)
     })
     
-    keyDown('right', () => {
+    onKeyDown('right', () => {
         jogador.move(VELOCIDADE_DE_MOVIMENTO, 0)
+    })
+
+    onKeyDown('up', () => {
+        jogador.move(0, -VELOCIDADE_DE_MOVIMENTO)
+    })
+
+    onKeyDown('down', () => {
+        jogador.move(0, VELOCIDADE_DE_MOVIMENTO)
     })
     
     const placar = add([
@@ -92,18 +132,18 @@ scene("jogo", () => {
     })
 
     let velocidadeAtualDoSpaceInvader = VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER
-    action("space-invader", (s) => {
+    onUpdate("space-invader", (s) => {
         s.move(velocidadeAtualDoSpaceInvader, 0)
     })
 
-    collides("space-invader", "parede-direita", () => {
+    onCollide("space-invader", "parede-direita", () => {
         velocidadeAtualDoSpaceInvader = -VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER
         every("space-invader", (s) => {
             s.move(0, ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER)
         })
     })
 
-    collides("space-invader", "parede-esquerda", () => {
+    onCollide("space-invader", "parede-esquerda", () => {
         velocidadeAtualDoSpaceInvader = VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER
         every("space-invader", (s) => {
             s.move(0, ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER)
@@ -125,20 +165,20 @@ scene("jogo", () => {
         ])
     }
 
-    keyPress("space", () => {
+    onKeyPress("space", () => {
         disparaTiro(jogador.pos.add(0, -10))
     })
 
-    action("tiro", (tiro) => {
+    onUpdate("tiro", (tiro) => {
         tiro.move(0, -VELOCIDADE_DO_TIRO)
-        burp()
         if (tiro.pos.y < 0) {
             tiro.destroy()
         }
     })
 
-    collides("tiro", "space-invader", (tiro, inimigo) => {
-        shake(120)
+    onCollide("tiro", "space-invader", (tiro, inimigo) => {
+        shake(80)
+        play("inimigoMorre")
         inimigo.destroy()
         tiro.destroy()
         placar.valor++
@@ -148,6 +188,9 @@ scene("jogo", () => {
 
 
 scene("perdeu", (dados) => {
+    somDaFase1.pause()
+    somDaDerrota.play()
+
     add([
         text("Game Over"),
         pos(center()),
@@ -160,7 +203,7 @@ scene("perdeu", (dados) => {
         origin("center")
     ])
 
-    
+    onClick(() => go("começo"))
 })
 
-go("jogo")
+go("começo")
