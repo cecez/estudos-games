@@ -1,0 +1,18 @@
+{
+  "name": "002-yt-kaboom-space-invaders",
+  "version": "1.0.0",
+  "description": "space invaders with kaboom",
+  "main": "index.js",
+  "dependencies": {
+    "esbuild": "^0.14.18",
+    "kaboom": "^2000.2.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild game.js --bundle --outfile=build.js",
+    "build:watch": "esbuild game.js --bundle --outfile=build.js --watch"
+  },
+  "author": "",
+  "license": "ISC"
+}
