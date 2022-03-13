@@ -2684,16 +2684,19 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var VELOCIDADE_DE_MOVIMENTO_DO_SPACE_INVADER = 400;
   var VELOCIDADE_DO_TIRO = 300;
   var ACRESCIMO_DE_ALTURA_PARA_SPACE_INVADER = 450;
-  var TEMPO_RESTANTE = 15;
+  var TEMPO_RESTANTE = 20;
+  var DIFERENCA_ICONE_INICIAL = 0.01;
   no({
     background: [0, 0, 255]
   });
   loadSprite("parede", "sprites/parede.png");
   loadSprite("bean", "sprites/bean.png");
   loadSprite("jp", "sprites/jp.png");
+  loadSprite("miguel", "sprites/miguel.png");
   loadSound("somDaDerrota", "sounds/derrota.mp3");
   loadSound("somDaFase1", "sounds/fundo_fase_1.m4a");
   loadSound("inimigoMorre", "sounds/inimigo_morre.m4a");
+  loadSound("somDoChefao", "sounds/ProjetoSomChefao.m4a");
   var somDaDerrota = play("somDaDerrota", {
     volume: 0.8,
     loop: true
@@ -2702,15 +2705,49 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     volume: 0.5,
     loop: true
   });
+  var somDaVitoria = play("somDoChefao", {
+    volume: 0.8,
+    loop: true
+  });
   scene("come\xE7o", () => {
+    add([
+      text("Aventuras de qualquer coisa"),
+      pos(width() / 2, 200),
+      origin("center"),
+      color(RED)
+    ]);
     add([
       text("Clique para iniciar o jogo"),
       pos(center()),
       origin("center")
     ]);
+    let scaleJogador = 0.1;
+    let scaleDelta = 0.25;
+    const jogador = add([
+      sprite("miguel"),
+      pos(width() / 6 - 100, height() / 1.5),
+      origin("center")
+    ]);
+    const jogador2 = add([
+      sprite("jp"),
+      pos(width() - 250, height() / 1.5),
+      origin("center")
+    ]);
+    jogador.onUpdate(() => {
+      if (scaleJogador > 2) {
+        scaleDelta = -DIFERENCA_ICONE_INICIAL;
+      }
+      if (scaleJogador < 0) {
+        scaleDelta = DIFERENCA_ICONE_INICIAL;
+      }
+      scaleJogador = scaleJogador + scaleDelta;
+      jogador.scale = scaleJogador;
+      jogador2.scale = 2 - scaleJogador;
+    });
     somDaDerrota.pause();
     somDaFase1.pause();
-    onClick(() => go("jogo"));
+    somDaVitoria.pause();
+    onClick(() => go("ganhou", { placar: "teste", tempo: "teste" }));
   });
   scene("jogo", () => {
     somDaFase1.play();
@@ -2823,6 +2860,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       inimigo.destroy();
       tiro.destroy();
       placar.valor++;
+      if (placar.valor == 25) {
+        go("ganhou", { placar: placar.valor, tempo: temporizador.tempo.toFixed(2) });
+      }
     });
   });
   scene("perdeu", (dados) => {
@@ -2836,6 +2876,27 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     add([
       text("Placar: " + dados.placar),
       pos(width() / 2, height() / 2 + 100),
+      origin("center")
+    ]);
+    onClick(() => go("come\xE7o"));
+  });
+  scene("ganhou", (dados) => {
+    somDaFase1.pause();
+    somDaVitoria.play();
+    layer(["ganhou"], "ganhou");
+    add([
+      text("Vitoria!"),
+      pos(center()),
+      origin("center")
+    ]);
+    add([
+      text("Placar: " + dados.placar),
+      pos(width() / 2, height() / 2 + 100),
+      origin("center")
+    ]);
+    add([
+      text("Tempo: " + dados.tempo),
+      pos(width() / 2, height() / 2 + 200),
       origin("center")
     ]);
     onClick(() => go("come\xE7o"));
