@@ -1,17 +1,19 @@
 {
-  "name": "002-yt-kaboom-space-invaders",
+  "name": "003-youtube-kaboom-mario",
   "version": "1.0.0",
-  "description": "space invaders with kaboom",
+  "description": "mario with kaboom",
   "main": "index.js",
   "dependencies": {
     "esbuild": "^0.14.18",
     "kaboom": "^2000.2.6"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.11.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild game.js --bundle --outfile=build.js",
-    "build:watch": "esbuild game.js --bundle --outfile=build.js --watch"
+    "build": "esbuild main.js --bundle --outfile=build.js",
+    "build:watch": "esbuild main.js --bundle --outfile=build.js --watch"
   },
   "author": "",
   "license": "ISC"
