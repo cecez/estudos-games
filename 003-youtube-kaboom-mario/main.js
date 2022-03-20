@@ -1,7 +1,8 @@
-import k from "./game";
 import SceneComeco from "./scenes/comeco";
 import SceneJogo from "./scenes/jogo";
+import loadSprites from "./loaders/sprites";
 
-k.scene("jogo", SceneJogo);
-k.scene("começo", SceneComeco);
-k.go("começo");
+loadSprites();
+scene("jogo", SceneJogo);
+scene("começo", SceneComeco);
+go("começo");

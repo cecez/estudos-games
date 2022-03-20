@@ -2683,12 +2683,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
 
   // constantes.js
   var constantes_default = {
-    corDeFundo: [0, 255, 0]
+    corDeFundo: [0, 0, 202],
+    characterSpeed: 100
   };
 
   // game.js
   var k2 = no({
-    scale: 1,
+    scale: 2,
     clearColor: [0, 0, 0, 1],
     background: constantes_default.corDeFundo
   });
@@ -2706,13 +2707,89 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onClick(() => go("jogo"));
   }
 
+  // characters/player.js
+  function player() {
+    const player2 = add([sprite("mario-standing"), pos(30, 0), area(), body()]);
+    player2.jumpForce = 500;
+    onKeyDown("left", () => {
+      player2.move(-constantes_default.characterSpeed, 0);
+    });
+    onKeyDown("right", () => {
+      player2.move(constantes_default.characterSpeed, 0);
+    });
+    onKeyDown("space", () => {
+      if (player2.isGrounded()) {
+        player2.jump();
+      }
+    });
+    return player2;
+  }
+
   // scenes/jogo.js
+  layers(["obj", "ui"], "obj");
+  var map = [
+    "                              ",
+    "                              ",
+    "                              ",
+    "                              ",
+    "                              ",
+    "                              ",
+    "                              ",
+    "   %  =*=%=                   ",
+    "                          -+  ",
+    "             ^  ^    x    ()  ",
+    "xxxxxxxxxxxxxxxxxxxxxx  xxxxxx"
+  ];
+  var levelConfiguration = {
+    width: 20,
+    height: 20,
+    $: () => [sprite("coin"), solid(), area()],
+    "=": () => [sprite("block"), solid(), area()],
+    "^": () => [sprite("goomba"), solid(), area(), body()],
+    x: () => [sprite("brick"), solid(), area()],
+    "(": () => [sprite("pipe-left"), scale(0.5), solid(), area()],
+    ")": () => [sprite("pipe-right"), scale(0.5), solid(), area()],
+    "-": () => [sprite("pipe-top-left"), scale(0.5), solid(), area()],
+    "+": () => [sprite("pipe-top-right"), scale(0.5), solid(), area()],
+    "%": () => [sprite("question"), "coin-surprise", solid(), area()],
+    "*": () => [sprite("question"), "mushroom-surprise", solid(), area()]
+  };
   function SceneJogo() {
-    game_default.add([text("Jogoo"), pos(width() / 2, 200), origin("center"), color(RED)]);
+    const gameLevel = addLevel(map, levelConfiguration);
+    const mainPlayer = player();
+    mainPlayer.onHeadbutt((obj) => {
+      if (obj.is("coin-surprise")) {
+        gameLevel.spawn("$", obj.gridPos.sub(0, 0));
+      }
+    });
+    const scoreLabel = add([
+      text("0"),
+      pos(30, 6),
+      layer("ui"),
+      {
+        value: "0"
+      }
+    ]);
+    add([text("Fase 1"), pos(70, 6)]);
+  }
+
+  // loaders/sprites.js
+  function loadSprites() {
+    loadSprite("coin", "sprites/coin.png");
+    loadSprite("block", "sprites/block.png");
+    loadSprite("goomba", "sprites/goomba.png");
+    loadSprite("brick", "sprites/brick.png");
+    loadSprite("pipe-left", "sprites/pipe-left.png");
+    loadSprite("pipe-right", "sprites/pipe-right.png");
+    loadSprite("pipe-top-left", "sprites/pipe-top-left-side.png");
+    loadSprite("pipe-top-right", "sprites/pipe-top-right-side.png");
+    loadSprite("question", "sprites/question.png");
+    loadSprite("mario-standing", "sprites/mario-standing.png");
   }
 
   // main.js
-  game_default.scene("jogo", SceneJogo);
-  game_default.scene("come\xE7o", SceneComeco);
-  game_default.go("come\xE7o");
+  loadSprites();
+  scene("jogo", SceneJogo);
+  scene("come\xE7o", SceneComeco);
+  go("come\xE7o");
 })();
