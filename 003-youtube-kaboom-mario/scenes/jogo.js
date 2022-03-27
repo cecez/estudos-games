@@ -1,49 +1,15 @@
+import mushroom from "../characters/mushroom";
 import player from "../characters/player";
+import playerCollisions from "../characters/player-collisions";
+import gameLevel from "./jogo-config";
 
 layers(["obj", "ui"], "obj");
 
-const map = [
-  "                              ",
-  "                              ",
-  "                              ",
-  "                              ",
-  "                              ",
-  "                              ",
-  "                              ",
-  "   %  =*=%=                   ",
-  "                          -+  ",
-  "             ^  ^    x    ()  ",
-  "xxxxxxxxxxxxxxxxxxxxxx  xxxxxx",
-];
-
-const levelConfiguration = {
-  width: 20,
-  height: 20,
-  $: () => [sprite("coin"), solid(), area()],
-  "=": () => [sprite("block"), solid(), area()],
-  "^": () => [sprite("goomba"), solid(), area(), body()],
-  x: () => [sprite("brick"), solid(), area()],
-  "(": () => [sprite("pipe-left"), scale(0.5), solid(), area()],
-  ")": () => [sprite("pipe-right"), scale(0.5), solid(), area()],
-  "-": () => [sprite("pipe-top-left"), scale(0.5), solid(), area()],
-  "+": () => [sprite("pipe-top-right"), scale(0.5), solid(), area()],
-  "%": () => [sprite("question"), "coin-surprise", solid(), area()],
-  "*": () => [sprite("question"), "mushroom-surprise", solid(), area()],
-};
-
 export default function SceneJogo() {
-  const gameLevel = addLevel(map, levelConfiguration);
-
-  // character
+  const level = gameLevel();
   const mainPlayer = player();
+  mushroom();
 
-  mainPlayer.onHeadbutt((obj) => {
-    if (obj.is("coin-surprise")) {
-      gameLevel.spawn("$", obj.gridPos.sub(0, 0));
-    }
-  });
-
-  // ui layer
   const scoreLabel = add([
     text("0"),
     pos(30, 6),
@@ -52,6 +18,8 @@ export default function SceneJogo() {
       value: "0",
     },
   ]);
+
+  playerCollisions(mainPlayer, level, scoreLabel);
 
   add([text("Fase 1"), pos(70, 6)]);
 }
