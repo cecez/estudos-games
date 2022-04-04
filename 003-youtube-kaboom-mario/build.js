@@ -2707,6 +2707,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onClick(() => go("jogo"));
   }
 
+  // characters/goomba.js
+  function goomba() {
+    action("dangerous", (goomba2) => {
+      goomba2.move(-20, 0);
+    });
+  }
+
   // characters/mushroom.js
   function mushroom() {
     action("mushroom", (mushroom2) => {
@@ -2717,7 +2724,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   // characters/player.js
   function playerObject() {
     let timer = 0;
+    let timerInjured = 0;
     let isBig = false;
+    let isInjured = false;
     return {
       biggify(time) {
         this.scale = vec2(2);
@@ -2726,6 +2735,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       },
       isBig() {
         return isBig;
+      },
+      isInjured() {
+        return isInjured;
+      },
+      injuried(time) {
+        isInjured = true;
+        timerInjured = time;
       },
       smallify() {
         this.scale = vec2(1);
@@ -2737,6 +2753,12 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
           timer -= dt();
           if (timer <= 0) {
             this.smallify();
+          }
+        }
+        if (isInjured) {
+          timerInjured -= dt();
+          if (timerInjured <= 0) {
+            isInjured = false;
           }
         }
       }
@@ -2788,6 +2810,23 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       scoreLabel.text = scoreLabel.value;
       destroy(coin);
     });
+    mainPlayer.collides("dangerous", (dangerous) => {
+      if (!mainPlayer.isGrounded()) {
+        dangerous.destroy();
+        scoreLabel.value++;
+        scoreLabel.text = scoreLabel.value;
+        return;
+      }
+      if (mainPlayer.isBig()) {
+        mainPlayer.smallify();
+        mainPlayer.injuried(5);
+      } else {
+        if (!mainPlayer.isInjured()) {
+          mainPlayer.destroy();
+          go("perdeu", { score: scoreLabel.value });
+        }
+      }
+    });
   }
 
   // scenes/jogo-config.js
@@ -2810,7 +2849,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     "=": () => [sprite("block"), solid(), area()],
     x: () => [sprite("brick"), solid(), area()],
     $: () => [sprite("coin"), "coin", solid(), area()],
-    "^": () => [sprite("goomba"), solid(), area(), body()],
+    "^": () => [sprite("goomba"), "dangerous", solid(), area(), body()],
     "#": () => [sprite("mushroom"), "mushroom", solid(), area(), body()],
     "(": () => [sprite("pipe-left"), scale(0.5), solid(), area()],
     ")": () => [sprite("pipe-right"), scale(0.5), solid(), area()],
@@ -2830,6 +2869,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     const level = gameLevel();
     const mainPlayer = player();
     mushroom();
+    goomba();
     const scoreLabel = add([
       text("0"),
       pos(30, 6),
@@ -2838,8 +2878,25 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         value: "0"
       }
     ]);
+    mainPlayer.onUpdate(() => {
+      camPos(player.pos);
+      if (mainPlayer.pos.y <= -10) {
+        go("perdeu", { score: scoreLabel.value });
+      }
+    });
     playerCollisions(mainPlayer, level, scoreLabel);
     add([text("Fase 1"), pos(70, 6)]);
+  }
+
+  // scenes/perdeu.js
+  function ScenePerdeu(dados) {
+    add([text("Game Over"), pos(center()), origin("center")]);
+    add([
+      text("Pontos: " + dados.score),
+      pos(width() / 2, height() / 2 + 100),
+      origin("center")
+    ]);
+    onClick(() => go("come\xE7o"));
   }
 
   // loaders/sprites.js
@@ -2860,6 +2917,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
 
   // main.js
   loadSprites();
+  scene("perdeu", ScenePerdeu);
   scene("jogo", SceneJogo);
   scene("come\xE7o", SceneComeco);
   go("come\xE7o");

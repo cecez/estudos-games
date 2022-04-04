@@ -1,3 +1,4 @@
+import goomba from "../characters/goomba";
 import mushroom from "../characters/mushroom";
 import player from "../characters/player";
 import playerCollisions from "../characters/player-collisions";
@@ -9,6 +10,7 @@ export default function SceneJogo() {
   const level = gameLevel();
   const mainPlayer = player();
   mushroom();
+  goomba();
 
   const scoreLabel = add([
     text("0"),
@@ -18,6 +20,13 @@ export default function SceneJogo() {
       value: "0",
     },
   ]);
+
+  mainPlayer.onUpdate(() => {
+    camPos(player.pos);
+    if (mainPlayer.pos.y <= -10) {
+      go("perdeu", { score: scoreLabel.value });
+    }
+  });
 
   playerCollisions(mainPlayer, level, scoreLabel);
 

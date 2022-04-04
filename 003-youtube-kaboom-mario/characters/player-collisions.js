@@ -23,4 +23,24 @@ export default function playerCollisions(mainPlayer, gameLevel, scoreLabel) {
     scoreLabel.text = scoreLabel.value;
     destroy(coin);
   });
+
+  mainPlayer.collides("dangerous", (dangerous) => {
+
+    if (!mainPlayer.isGrounded()) {
+      dangerous.destroy();
+      scoreLabel.value++;
+      scoreLabel.text = scoreLabel.value;
+      return;
+    }
+
+    if (mainPlayer.isBig()) {
+      mainPlayer.smallify();
+      mainPlayer.injuried(5);
+    } else {
+      if (!mainPlayer.isInjured()) {
+        mainPlayer.destroy();
+        go("perdeu", { score: scoreLabel.value });
+      }
+    }
+  });
 }

@@ -3,7 +3,9 @@ import constantes from "../constantes";
 // functions
 function playerObject() {
   let timer = 0;
+  let timerInjured = 0;
   let isBig = false;
+  let isInjured = false;
   return {
     biggify(time) {
       this.scale = vec2(2);
@@ -12,6 +14,13 @@ function playerObject() {
     },
     isBig() {
       return isBig;
+    },
+    isInjured() {
+      return isInjured;
+    },
+    injuried(time) {
+      isInjured = true;
+      timerInjured = time;
     },
     smallify() {
       this.scale = vec2(1);
@@ -23,6 +32,13 @@ function playerObject() {
         timer -= dt();
         if (timer <= 0) {
           this.smallify();
+        }
+      }
+
+      if (isInjured) {
+        timerInjured -= dt();
+        if (timerInjured <= 0) {
+          isInjured = false;
         }
       }
     },
@@ -38,6 +54,7 @@ export default function player() {
     playerObject(),
   ]);
   player.jumpForce = 500;
+
 
   // movements
   onKeyDown("left", () => {
